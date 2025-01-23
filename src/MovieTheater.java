@@ -1,4 +1,10 @@
 import java.util.ArrayList;
+import java.util.Scanner;
+
+//Simulate a movie theater that helps users to book and reserve seats.
+//reserve seats (if seat is taken, let them know it is taken and suggest an available seat)
+//cancel seats
+//retrieve initial seating charting
 
 public class MovieTheater {
     private int rows;
@@ -72,12 +78,48 @@ public class MovieTheater {
     }
 
     public static void main(String[] args) {
-        MovieTheater theater = new MovieTheater(5, 10);
+        Scanner scanner = new Scanner(System.in);
+        MovieTheater theater = new MovieTheater(5, 5);
+        boolean running = true;
 
-        theater.reserveSeat(2, 5);
-        theater.reserveSeat(2, 5);
-        theater.printSeatingChart();
-        theater.cancelSeat(2, 5);
-        theater.printSeatingChart();
+        System.out.println("Welcome to the Movie Theater Reservation System!");
+
+        while (running) {
+            System.out.println("\nOptions:");
+            System.out.println("1. Reserve a seat");
+            System.out.println("2. Cancel a reservation");
+            System.out.println("3. View seating chart");
+            System.out.println("4. View available seats");
+            System.out.println("5. Exit");
+            System.out.print("Choose an option: ");
+
+            int choice = scanner.nextInt();
+
+            switch (choice) {
+                case 1 -> {
+                    System.out.print("Enter row number: ");
+                    int row = scanner.nextInt();
+                    System.out.print("Enter seat number: ");
+                    int seat = scanner.nextInt();
+                    theater.reserveSeat(row, seat);
+                }
+                case 2 -> {
+                    System.out.print("Enter row number: ");
+                    int row = scanner.nextInt();
+                    System.out.print("Enter seat number: ");
+                    int seat = scanner.nextInt();
+                    theater.cancelSeat(row, seat);
+                }
+                case 3 -> theater.printSeatingChart();
+                case 4 -> theater.printAvailableSeats();
+                case 5 -> {
+                    running = false;
+                    System.out.println("Goodbye!");
+                }
+                default -> System.out.println("Invalid option. Please try again.");
+            }
+        }
+
+        scanner.close();
     }
 }
