@@ -14,27 +14,69 @@ public class UndoRedoManager<T> {
         private Node (T state) {
             this.state = state;
         }
-
     }
+
     private Node currentState;
-    //Undo operation
-    public T undo(){
-        //implement me
+    private Node head;
+
+    // Undo operation
+    public T undo() {
+        if (currentState == null || currentState.prev == null) {
+            return null;
+        }
+
+        currentState = currentState.prev;
+        return currentState.state;
     }
 
-    //perform an operation
-    public void  addState (T newState) {
-        //implement me
+    public void addState(T newState) {
+        Node newNode = new Node(newState);
 
+        if (currentState == null) {
+            head = newNode;
+            currentState = newNode;
+            return;
+        }
+
+        if (currentState.next != null) {
+            currentState.next = null;
+        }
+
+        newNode.prev = currentState;
+        currentState.next = newNode;
+
+        currentState = newNode;
     }
 
-    //Redo Operation
-    public T redo(){
-        //implement me
+    // Redo Operation
+    public T redo() {
+        if (currentState == null || currentState.next == null) {
+            return null;
+        }
+
+        currentState = currentState.next;
+        return currentState.state;
+    }
+
+    public T getCurrentState() {
+        return currentState != null ? currentState.state : null;
     }
 
     public static void main(String[] args) {
+        // Example usage
+        UndoRedoManager<String> manager = new UndoRedoManager<>();
 
+        manager.addState("First State");
+        manager.addState("Second State");
+        manager.addState("Third State");
 
+        System.out.println("Current State: " + manager.getCurrentState());
+
+        System.out.println("Undo: " + manager.undo());
+
+        System.out.println("Redo: " + manager.redo());
+
+        manager.addState("Fourth State");
+        System.out.println("Current State: " + manager.getCurrentState());
     }
 }
