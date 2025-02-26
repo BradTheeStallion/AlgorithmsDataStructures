@@ -2,9 +2,11 @@ package MidtermSprint;
 
 public class TaskList {
     private Task head;
+    private int size;
 
     public TaskList() {
         head = null;
+        size = 0;
     }
 
     public void addTask(String name, String description) {
@@ -12,6 +14,12 @@ public class TaskList {
 
         if (head == null) {
             head = newTask;
+            size++;
+            return;
+        }
+
+        if (findTask(name) != null) {
+            System.out.println("Task '" + name + "' already exists!");
             return;
         }
 
@@ -20,7 +28,24 @@ public class TaskList {
             current = current.next;
         }
         current.next = newTask;
+        size++;
     }
+
+    public int getSize() {
+        return size;
+    }
+
+    public Task findTask(String name) {
+        Task current = head;
+        while (current != null) {
+            if (current.getName().equalsIgnoreCase(name)) {
+                return current;
+            }
+            current = current.next;
+        }
+        return null;
+    }
+
     public boolean isEmpty() {
         return head == null;
     }
@@ -31,6 +56,7 @@ public class TaskList {
             return;
         }
         head = head.next;
+        size--;
     }
 
     public void deleteLastTask() {
@@ -41,6 +67,7 @@ public class TaskList {
 
         if (head.next == null) {
             head = null;
+            size--;
             return;
         }
 
@@ -49,6 +76,7 @@ public class TaskList {
             current = current.next;
         }
         current.next = null;
+        size--;
     }
 
     public void deleteTask(String name) {
@@ -57,18 +85,20 @@ public class TaskList {
             return;
         }
 
-        if (head.getName().equals(name)) {
+        if (head.getName().equalsIgnoreCase(name)) {
             deleteFirstTask();
             return;
         }
 
         Task current = head;
-        while (current.next != null && !current.next.getName().equals(name)) {
+        while (current.next != null && !current.next.getName().equalsIgnoreCase(name)) {
             current = current.next;
         }
 
         if (current.next != null) {
             current.next = current.next.next;
+            size--;
+            System.out.println("Task '" + name + "' deleted successfully!");
         } else {
             System.out.println("Task '" + name + "' not found!");
         }
@@ -81,11 +111,12 @@ public class TaskList {
         }
 
         Task current = head;
-        System.out.println("\nCurrent Task List:");
+        System.out.println("\nCurrent Task List (" + size + " tasks):");
+        int count = 1;
         while (current != null) {
-            String status = current.isComplete() ? "[✔ Completed]" : "[ ] Pending";
-            System.out.println("- " + current.getName() + ": " + current.getDescription() + " " + status);
+            System.out.println(count + ". " + current.toString());
             current = current.next;
+            count++;
         }
     }
 
@@ -95,15 +126,35 @@ public class TaskList {
             return;
         }
 
-        Task current = head;
-        while (current != null) {
-            if (current.getName().equals(name)) {
-                current.setComplete(true);
+        Task task = findTask(name);
+        if (task != null) {
+            if (task.isComplete()) {
+                System.out.println("Task '" + name + "' is already completed!");
+            } else {
+                task.setComplete(true);
                 System.out.println("Task '" + name + "' marked as completed!");
-                return;
             }
-            current = current.next;
+        } else {
+            System.out.println("Task '" + name + "' not found!");
         }
-        System.out.println("Task '" + name + "' not found!");
+    }
+
+    public void markTaskAsIncomplete(String name) {
+        if (isEmpty()) {
+            System.out.println("Task list is empty!");
+            return;
+        }
+
+        Task task = findTask(name);
+        if (task != null) {
+            if (!task.isComplete()) {
+                System.out.println("Task '" + name + "' is already pending!");
+            } else {
+                task.setComplete(false);
+                System.out.println("Task '" + name + "' marked as pending!");
+            }
+        } else {
+            System.out.println("Task '" + name + "' not found!");
+        }
     }
 }
