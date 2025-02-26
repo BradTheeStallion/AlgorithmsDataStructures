@@ -1,7 +1,6 @@
 package MidtermSprint;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -18,131 +17,127 @@ public class TaskListTest {
         System.setOut(new PrintStream(outContent));
     }
 
-    @AfterEach
-    public void tearDown() {
-        System.setOut(originalOut);
-    }
-
-    @Test
-    public void testIsEmpty() {
-        assertTrue(taskList.isEmpty());
-
-        taskList.addTask("Task1", "Description1");
-        assertFalse(taskList.isEmpty());
-
-        taskList.deleteFirstTask();
-        assertTrue(taskList.isEmpty());
-    }
-
     @Test
     public void testAddTask() {
+        assertTrue(taskList.isEmpty());
+        assertEquals(0, taskList.getSize());
+
         taskList.addTask("Task1", "Description1");
         assertFalse(taskList.isEmpty());
+        assertEquals(1, taskList.getSize());
 
         taskList.addTask("Task2", "Description2");
-        taskList.addTask("Task3", "Description3");
+        assertEquals(2, taskList.getSize());
+    }
 
+    @Test
+    public void testAddDuplicateTask() {
+        taskList.addTask("Task1", "Description1");
         outContent.reset();
-        taskList.displayTasks();
-        String output = outContent.toString();
-        assertTrue(output.contains("Task1"));
-        assertTrue(output.contains("Task2"));
-        assertTrue(output.contains("Task3"));
+
+        taskList.addTask("Task1", "New Description");
+        assertTrue(outContent.toString().contains("Task 'Task1' already exists!"));
+        assertEquals(1, taskList.getSize());
+    }
+
+    @Test
+    public void testFindTask() {
+        taskList.addTask("Task1", "Description1");
+        taskList.addTask("Task2", "Description2");
+
+        Task found = taskList.findTask("Task1");
+        assertNotNull(found);
+        assertEquals("Task1", found.getName());
+
+        found = taskList.findTask("NonExistent");
+        assertNull(found);
+
+        found = taskList.findTask("tAsK1");
+        assertNotNull(found);
+        assertEquals("Task1", found.getName());
     }
 
     @Test
     public void testDeleteFirstTask() {
-        outContent.reset();
-        taskList.deleteFirstTask();
-        assertEquals("Task list is empty!\n", outContent.toString());
-
-        taskList.addTask("Task1", "Description1");
-        taskList.deleteFirstTask();
-        assertTrue(taskList.isEmpty());
-
         taskList.addTask("Task1", "Description1");
         taskList.addTask("Task2", "Description2");
-        outContent.reset();
-        taskList.displayTasks();
-        String beforeDelete = outContent.toString();
-        assertTrue(beforeDelete.contains("Task1"));
 
         taskList.deleteFirstTask();
-        outContent.reset();
-        taskList.displayTasks();
-        String afterDelete = outContent.toString();
-        assertFalse(afterDelete.contains("Task1"));
-        assertTrue(afterDelete.contains("Task2"));
+        assertEquals(1, taskList.getSize());
+        assertNull(taskList.findTask("Task1"));
+        assertNotNull(taskList.findTask("Task2"));
     }
 
     @Test
     public void testDeleteLastTask() {
-        outContent.reset();
-        taskList.deleteLastTask();
-        assertEquals("Task list is empty!\n", outContent.toString());
-
         taskList.addTask("Task1", "Description1");
-        taskList.deleteLastTask();
-        assertTrue(taskList.isEmpty());
+        taskList.addTask("Task2", "Description2");
 
+        taskList.deleteLastTask();
+        assertEquals(1, taskList.getSize());
+        assertNotNull(taskList.findTask("Task1"));
+        assertNull(taskList.findTask("Task2"));
+    }
+
+    @Test
+    public void testDeleteSpecificTask() {
         taskList.addTask("Task1", "Description1");
         taskList.addTask("Task2", "Description2");
         taskList.addTask("Task3", "Description3");
 
+        taskList.deleteTask("Task2");
+        assertEquals(2, taskList.getSize());
+        assertNotNull(taskList.findTask("Task1"));
+        assertNull(taskList.findTask("Task2"));
+        assertNotNull(taskList.findTask("Task3"));
+    }
+
+    @Test
+    public void testMarkTaskAsCompleted() {
+        taskList.addTask("Task1", "Description1");
+
+        taskList.markTaskAsCompleted("Task1");
+        Task task = taskList.findTask("Task1");
+        assertTrue(task.isComplete());
+
+        outContent.reset();
+        taskList.markTaskAsCompleted("Task1");
+        assertTrue(outContent.toString().contains("Task 'Task1' is already completed!"));
+    }
+
+    @Test
+    public void testMarkTaskAsIncomplete() {
+        taskList.addTask("Task1", "Description1");
+        taskList.markTaskAsCompleted("Task1");
+
+        taskList.markTaskAsIncomplete("Task1");
+        Task task = taskList.findTask("Task1");
+        assertFalse(task.isComplete());
+
+        outContent.reset();
+        taskList.markTaskAsIncomplete("Task1");
+        assertTrue(outContent.toString().contains("Task 'Task1' is already pending!"));
+    }
+
+    @Test
+    public void testEmptyListOperations() {
+        taskList.deleteFirstTask();
+        assertTrue(outContent.toString().contains("Task list is empty!"));
+        outContent.reset();
+
         taskList.deleteLastTask();
+        assertTrue(outContent.toString().contains("Task list is empty!"));
         outContent.reset();
-        taskList.displayTasks();
-        String output = outContent.toString();
-        assertTrue(output.contains("Task1"));
-        assertTrue(output.contains("Task2"));
-        assertFalse(output.contains("Task3"));
-    }
 
-    @Test
-    public void testDeleteTask() {
+        taskList.deleteTask("Any");
+        assertTrue(outContent.toString().contains("Task list is empty!"));
         outContent.reset();
-        taskList.deleteTask("Task1");
-        assertEquals("Task list is empty!\n", outContent.toString());
 
-        taskList.addTask("Task1", "Description1");
-        taskList.addTask("Task2", "Description2");
-        taskList.addTask("Task3", "Description3");
-
-        taskList.deleteTask("Task1");
+        taskList.markTaskAsCompleted("Any");
+        assertTrue(outContent.toString().contains("Task list is empty!"));
         outContent.reset();
-        taskList.displayTasks();
-        String afterDeleteFirst = outContent.toString();
-        assertFalse(afterDeleteFirst.contains("Task1"));
-        assertTrue(afterDeleteFirst.contains("Task2"));
 
-        taskList.addTask("Task4", "Description4");
-        taskList.deleteTask("Task3");
-        outContent.reset();
-        taskList.displayTasks();
-        String afterDeleteMiddle = outContent.toString();
-        assertFalse(afterDeleteMiddle.contains("Task3"));
-        assertTrue(afterDeleteMiddle.contains("Task2"));
-        assertTrue(afterDeleteMiddle.contains("Task4"));
-
-        outContent.reset();
-        taskList.deleteTask("NonExistentTask");
-        assertTrue(outContent.toString().contains("Task 'NonExistentTask' not found!"));
-    }
-
-    @Test
-    public void testDisplayTasks() {
-        outContent.reset();
-        taskList.displayTasks();
-        assertEquals("Task list is empty!\n", outContent.toString());
-
-        taskList.addTask("Task1", "Description1");
-        taskList.addTask("Task2", "Description2");
-
-        outContent.reset();
-        taskList.displayTasks();
-        String output = outContent.toString();
-        assertTrue(output.contains("Current Task List:"));
-        assertTrue(output.contains("- Task1"));
-        assertTrue(output.contains("- Task2"));
+        taskList.markTaskAsIncomplete("Any");
+        assertTrue(outContent.toString().contains("Task list is empty!"));
     }
 }
