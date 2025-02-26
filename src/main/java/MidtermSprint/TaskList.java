@@ -83,8 +83,27 @@ public class TaskList {
         Task current = head;
         System.out.println("\nCurrent Task List:");
         while (current != null) {
-            System.out.println("- " + current.getName());
+            String status = current.isComplete() ? "[✔ Completed]" : "[ ] Pending";
+            System.out.println("- " + current.getName() + ": " + current.getDescription() + " " + status);
             current = current.next;
         }
+    }
+
+    public void markTaskAsCompleted(String name) {
+        if (isEmpty()) {
+            System.out.println("Task list is empty!");
+            return;
+        }
+
+        Task current = head;
+        while (current != null) {
+            if (current.getName().equals(name)) {
+                current.setComplete(true);
+                System.out.println("Task '" + name + "' marked as completed!");
+                return;
+            }
+            current = current.next;
+        }
+        System.out.println("Task '" + name + "' not found!");
     }
 }
